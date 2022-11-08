@@ -1,0 +1,110 @@
+def replace_list = [
+        // 'maven.apache.org/maven',
+        'jcenter.bintray.com',
+        // 'maven.google.com',
+        'plugins.gradle.org/m2',
+        // 'repo.spring.io/libs-milestone',
+        // 'repo.spring.io/plugins-release',
+        // 'repo.grails.org/grails/core',
+        // 'repository.apache.org/snapshots'
+        'repo1.maven.org/maven2',
+        'repo.maven.apache.org',
+        'jcenter.bintray.com',
+        'maven.google.com',
+        'plugins.gradle.org/m2',
+        'repo.spring.io/libs-milestone',
+        'repo.spring.io/plugins-release',
+        'repo.grails.org/grails/core',
+        'repository.apache.org/snapshots'
+]
+
+def settingsRepoConfig =  (repo, readonly = false) -> {
+    if (readonly)
+        println("gradle init: [settings] readonly mode for preview changes")
+    def mirrors = [
+            repo.maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' },
+            // repo.maven { url 'https://maven.aliyun.com/repository/central' },
+            // repo.maven { url 'https://maven.aliyun.com/repository/jcenter' },
+            // repo.maven { url 'https://maven.aliyun.com/repository/google' },
+            repo.maven { url 'https://maven.aliyun.com/repository/gradle-plugin' },
+            // repo.maven { url 'https://maven.aliyun.com/repository/releases' },
+            // repo.maven { url 'https://maven.aliyun.com/repository/spring' },
+            // repo.maven { url 'https://maven.aliyun.com/repository/spring-plugin' },
+            // repo.maven { url 'https://maven.aliyun.com/repository/grails-core' },
+            // repo.maven { url 'https://maven.aliyun.com/repository/apache-snapshots' }
+    ]
+
+    def rm_list = []
+    repo.each {
+//        if (readonly)
+        println("repo: ${it.url}")
+        def url = it.url.toString()
+        replace_list.each(str -> {
+            if (url.indexOf(str) != -1) {
+                rm_list.add(it)
+                println "gradle init: [settings] (${it.name}: ${it.url}) removed"
+            }
+        })
+    }
+    if (!readonly) {
+        rm_list.each { repo.remove(it) }
+        mirrors.each { repo.add(it) }
+    }
+}
+
+
+settingsEvaluated {
+    it.pluginManagement {
+        settingsRepoConfig(repositories)
+    }
+    it.dependencyResolutionManagement {
+        settingsRepoConfig(repositories)
+    }
+}
+
+def repoConfig = {
+    all { ArtifactRepository repo ->
+        if (repo instanceof MavenArtifactRepository) {
+            def url = repo.url.toString()
+            rm_list.each {
+                if (!url.contains(it))
+                return
+                    println("gradle init: [buildscript.repositories] (${repo.name}: ${repo.url}) removed")
+                    remove(repo)
+            }
+            /* if (false
+                    || url.contains('repo1.maven.org/maven2')
+                    || url.contains('repo.maven.apache.org')
+                    || url.contains('jcenter.bintray.com')
+                    || url.contains('maven.google.com')
+                    || url.contains('plugins.gradle.org/m2')
+                    || url.contains('repo.spring.io/libs-milestone')
+                    || url.contains('repo.spring.io/plugins-release')
+                    || url.contains('repo.grails.org/grails/core')
+                    || url.contains('repository.apache.org/snapshots')
+            ) {
+                println("gradle init: [buildscript.repositories] (${repo.name}: ${repo.url}) removed")
+                remove(repo)
+            } */
+        }
+    }
+
+    // 腾讯云 maven 镜像聚合了：central、jcenter、google、gradle-plugin
+    maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
+    // 阿里云 https://help.aliyun.com/document_detail/102512.html
+    // maven { url 'https://maven.aliyun.com/repository/central' }
+    // maven { url 'https://maven.aliyun.com/repository/jcenter' }
+    // maven { url 'https://maven.aliyun.com/repository/google' }
+    // maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
+    // maven { url 'https://maven.aliyun.com/repository/spring' }
+    // maven { url 'https://maven.aliyun.com/repository/spring-plugin' }
+    // maven { url 'https://maven.aliyun.com/repository/grails-core' }
+    // maven { url 'https://maven.aliyun.com/repository/apache-snapshots' }
+}
+
+allprojects {
+    buildscript {
+        repositories(repoConfig)
+    }
+    repositories(repoConfig)
+}
