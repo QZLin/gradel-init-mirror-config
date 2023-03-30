@@ -18,32 +18,6 @@ val appendList: List<String> = listOf()
 val logTag = "init.gradle.kts"
 println("[$logTag]")
 
-/*initscript {
-    repositories { }
-    dependencies {}
-}*/
-
-/*fun HandleRepos(container: ArtifactRepositoryContainer): List<String> {
-    val rmList = mutableListOf<ArtifactRepository>()
-    val addList = mutableListOf<String>()
-    container.forEach { repo: ArtifactRepository ->
-        if (repo is MavenArtifactRepository) {
-            val url = repo.url.toString()
-            println("[$logTag] ${repo.name}($url)")
-            replaceDict.forEach { k, v ->
-                if (url.contains(k)) {
-                    println("[$logTag] $k -> $v")
-                    rmList.add(repo)
-                    addList.add(v)
-                }
-            }
-        }
-    }
-    rmList.forEach {
-        container.remove(it)
-    }
-    return addList
-}*/
 val repoConfig: RepositoryHandler.() -> Unit = {
     this.forEach { repo: ArtifactRepository ->
         if (!(repo is MavenArtifactRepository)) return@forEach
@@ -56,42 +30,8 @@ val repoConfig: RepositoryHandler.() -> Unit = {
         }
 
     }
-//    rmList.forEach {
-//        println("[$logTag] \tRemove: ${it.name}(\"${it.url}\")")
-//        this.remove(it)
-//    }
-//    addList.addAll(appendList)
-//    addList.forEach {
-//        println("[$logTag] \t   Add: maven(\"$it\")")
-//        this.add(this.maven(it))
-//    }
 }
 
-/*val repoConfig: RepositoryHandler.() -> Unit = {
-    val rmList = mutableListOf<MavenArtifactRepository>()
-    val addList = mutableListOf<String>()
-    this.forEach { repo: ArtifactRepository ->
-        if (!(repo is MavenArtifactRepository)) return@forEach
-        val repo_url = repo.url.toString()
-        logger.info("[$logTag] \t${repo.name}(\"$repo_url\")")
-        replaceDict.forEach { k, v ->
-            if (repo_url.contains(k).not()) return@forEach
-            logger.info("[$logTag] $k -> $v")
-            rmList.add(repo)
-            addList.add(v)
-        }
-
-    }
-    rmList.forEach {
-        println("[$logTag] \tRemove: ${it.name}(\"${it.url}\")")
-        this.remove(it)
-    }
-    addList.addAll(appendList)
-    addList.forEach {
-        println("[$logTag] \t   Add: maven(\"$it\")")
-        this.add(this.maven(it))
-    }
-}*/
 settingsEvaluated {
     this.pluginManagement {
         repoConfig(repositories)

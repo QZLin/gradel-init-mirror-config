@@ -13,52 +13,7 @@ var LinkedHashMap<String, String> replaceDict = //
          "repo.spring.io/plugins-release" : "https://maven.aliyun.com/repository/spring-plugin",//
         ]
 var ArrayList<String> appendList = []
-/*var removeList = ['jcenter.bintray.com',
-                  'maven.google.com',
-                  'plugins.gradle.org/m2',
-                  'repo.maven.apache.org',
-                  'repo1.maven.org/maven2',
-                  'repository.apache.org/snapshots',
-                  'repo.spring.io/libs-milestone',
-                  'repo.spring.io/plugins-release',
-                  'repo.grails.org/grails/core']
-var mirrorList = ['https://mirrors.cloud.tencent.com/nexus/repository/maven-public/',
-                  'https://maven.aliyun.com/repository/central',
-//        'https://maven.aliyun.com/repository/jcenter',
-                  'https://maven.aliyun.com/repository/google',
-                  'https://maven.aliyun.com/repository/gradle-plugin',
-                  'https://maven.aliyun.com/repository/releases',
-//        'https://maven.aliyun.com/repository/spring',
-//        'https://maven.aliyun.com/repository/spring-plugin',
-//        'https://maven.aliyun.com/repository/grails-core',
-//        'https://maven.aliyun.com/repository/apache-snapshots'
-]*/
 
-
-/*var SettingsRepoConfig = (RepositoryHandler repo) -> {
-    var removeLater = []
-    repo.each { ArtifactRepository it ->
-        println("gradle init: [SettingsRepoConfig] check (${it.name}: ${it.url})")
-        var url = it.url.toString()
-        removeList.each(pattern -> {
-            if (url.contains(pattern)) {
-                removeLater.add(it)
-            }
-        })
-    }
-    removeLater.each {
-        repo.remove(it)
-        println("gradle init: [SettingsRepoConfig] remove (${it.name}: ${it.url})")
-
-    }
-    mirrorList.each {
-        var repoObject = repo.maven {}
-        repoObject.url = URI.create(it)
-        repo.add(repoObject)
-        println("gradle init: [SettingsRepoConfig] add (${repoObject.name}: ${repoObject.url})")
-    }
-
-}*/
 
 var logTag = "init.gradle"
 println("[$logTag]")
