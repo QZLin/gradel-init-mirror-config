@@ -1,4 +1,19 @@
-var removeList = ['jcenter.bintray.com',
+var LinkedHashMap<String, String> replaceDict = //
+        ["jcenter.bintray.com"            : "https://maven.aliyun.com/repository/jcenter",//
+         "maven.google.com"               : "https://maven.aliyun.com/repository/google",//
+         "plugins.gradle.org/m2"          : "https://maven.aliyun.com/repository/gradle-plugin",//
+//         "repo.maven.apache.org/maven2/"  : "https://maven.aliyun.com/mvn/search",//
+         "repo.maven.apache.org/maven2"   : "https://maven.aliyun.com/repository/central",//
+         "repo1.maven.org/maven2"         : "https://maven.aliyun.com/repository/central",//
+         "repository.apache.org/snapshots": "https://maven.aliyun.com/repository/apache-snapshots",//
+
+         "repo.grails.org/grails/core"    : "https://maven.aliyun.com/repository/grails-core",//
+
+         "repo.spring.io/libs-milestone"  : "https://maven.aliyun.com/repository/spring",//
+         "repo.spring.io/plugins-release" : "https://maven.aliyun.com/repository/spring-plugin",//
+        ]
+var ArrayList<String> appendList = []
+/*var removeList = ['jcenter.bintray.com',
                   'maven.google.com',
                   'plugins.gradle.org/m2',
                   'repo.maven.apache.org',
@@ -17,14 +32,14 @@ var mirrorList = ['https://mirrors.cloud.tencent.com/nexus/repository/maven-publ
 //        'https://maven.aliyun.com/repository/spring-plugin',
 //        'https://maven.aliyun.com/repository/grails-core',
 //        'https://maven.aliyun.com/repository/apache-snapshots'
-]
+]*/
 
 
-def SettingsRepoConfig = (RepositoryHandler repo) -> {
+/*var SettingsRepoConfig = (RepositoryHandler repo) -> {
     var removeLater = []
     repo.each { ArtifactRepository it ->
         println("gradle init: [SettingsRepoConfig] check (${it.name}: ${it.url})")
-        def url = it.url.toString()
+        var url = it.url.toString()
         removeList.each(pattern -> {
             if (url.contains(pattern)) {
                 removeLater.add(it)
@@ -43,46 +58,36 @@ def SettingsRepoConfig = (RepositoryHandler repo) -> {
         println("gradle init: [SettingsRepoConfig] add (${repoObject.name}: ${repoObject.url})")
     }
 
-}
+}*/
 
+var logTag = "init.gradle"
+println("[$logTag]")
 
-def repoConfig = {
+var repoConfig = { RepositoryHandler handler ->
     configureEach { ArtifactRepository repo ->
-        if (!repo instanceof MavenArtifactRepository) return
         if (!repo.hasProperty('url')) return
-        var url = repo.url.toString()
-        removeList.each {
-            if (!url.contains(it)) return
-            remove(repo)
-            println("gradle init: [buildscript.repositories] (${repo.name}: ${repo.url}) removed")
+        var repo_url = repo.url.toString()
+        logger.info("[$logTag] \t${repo.name}(\"$repo_url\")")
+        replaceDict.forEach { k, v ->
+            if (!repo_url.contains(k)) return
+            println("[$logTag] ${repo.name}(\"${repo.url}\") -> $v")
+            repo.setUrl(URI.create(v))
         }
-
-    }
-}
-
-def AddMirrors = repo -> {
-    mirrorList.each {
-        var repo_obj = repo.maven {}
-        repo_obj.setUrl(URI.create(it))
-        repo.add(repo_obj)
-        println("Add: ${repo_obj.url}")
     }
 }
 
 settingsEvaluated {
     it.pluginManagement {
-        repositories(SettingsRepoConfig)
+        repositories(repoConfig)
     }
     it.dependencyResolutionManagement {
-        repositories(SettingsRepoConfig)
+        repositories(repoConfig)
     }
 }
 
 allprojects {
     buildscript {
-        repositories(RepoConfig)
-        AddMirrors(repositories)
+        repositories(repoConfig)
     }
-    repositories(RepoConfig)
-    AddMirrors(repositories)
+    repositories(repoConfig)
 }

@@ -1,3 +1,5 @@
+import java.net.*
+
 val replaceDict = mapOf(
         "jcenter.bintray.com" to "https://maven.aliyun.com/repository/jcenter",//
         "maven.google.com" to "https://maven.aliyun.com/repository/google",//
@@ -6,13 +8,13 @@ val replaceDict = mapOf(
         "repo1.maven.org/maven2" to "https://maven.aliyun.com/repository/central",//
         "repository.apache.org/snapshots" to "https://maven.aliyun.com/repository/apache-snapshots",//
 
-        "repo.grails.org/grails/core" to "https://maven.aliyun.com/repository/spring-plugin",//
         "repo.grails.org/grails/core" to "https://maven.aliyun.com/repository/grails-core",//
 
         "repo.spring.io/libs-milestone" to "https://maven.aliyun.com/repository/spring",//
         "repo.spring.io/plugins-release" to "https://maven.aliyun.com/repository/spring-plugin",//
 )
 val appendList: List<String> = listOf()
+
 val logTag = "init.gradle.kts"
 println("[$logTag]")
 
@@ -42,16 +44,38 @@ println("[$logTag]")
     }
     return addList
 }*/
-
 val repoConfig: RepositoryHandler.() -> Unit = {
+    this.forEach { repo: ArtifactRepository ->
+        if (!(repo is MavenArtifactRepository)) return@forEach
+        val repo_url = repo.url.toString()
+        logger.info("[$logTag] \t${repo.name}(\"$repo_url\")")
+        replaceDict.forEach { k, v ->
+            if (!repo_url.contains(k)) return@forEach
+            println("[$logTag] ${repo.name}(\"${repo.url}\") -> $v")
+            repo.setUrl(URI.create(v))
+        }
+
+    }
+//    rmList.forEach {
+//        println("[$logTag] \tRemove: ${it.name}(\"${it.url}\")")
+//        this.remove(it)
+//    }
+//    addList.addAll(appendList)
+//    addList.forEach {
+//        println("[$logTag] \t   Add: maven(\"$it\")")
+//        this.add(this.maven(it))
+//    }
+}
+
+/*val repoConfig: RepositoryHandler.() -> Unit = {
     val rmList = mutableListOf<MavenArtifactRepository>()
     val addList = mutableListOf<String>()
     this.forEach { repo: ArtifactRepository ->
         if (!(repo is MavenArtifactRepository)) return@forEach
-        val url = repo.url.toString()
-        logger.info("[$logTag] \t${repo.name}(\"$url\")")
+        val repo_url = repo.url.toString()
+        logger.info("[$logTag] \t${repo.name}(\"$repo_url\")")
         replaceDict.forEach { k, v ->
-            if (url.contains(k).not()) return@forEach
+            if (repo_url.contains(k).not()) return@forEach
             logger.info("[$logTag] $k -> $v")
             rmList.add(repo)
             addList.add(v)
@@ -67,17 +91,16 @@ val repoConfig: RepositoryHandler.() -> Unit = {
         println("[$logTag] \t   Add: maven(\"$it\")")
         this.add(this.maven(it))
     }
-}
+}*/
 settingsEvaluated {
     this.pluginManagement {
-        repositories(repoConfig)
+        repoConfig(repositories)
     }
     this.dependencyResolutionManagement {
-        repositories(repoConfig)
+        repoConfig(repositories)
     }
 }
 allprojects {
-
     buildscript {
         repoConfig(repositories)
     }

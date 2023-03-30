@@ -2,7 +2,9 @@ plugins {
     id 'groovy'
 }
 repositories {
+    google()
     mavenCentral()
+    gradlePluginPortal()
 }
 
 dependencies {
