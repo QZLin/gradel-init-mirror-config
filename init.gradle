@@ -1,21 +1,18 @@
-var removeList = [
-        'jcenter.bintray.com',
-        'maven.google.com',
-        'plugins.gradle.org/m2',
-        'repo.maven.apache.org',
-        'repo1.maven.org/maven2',
-        'repository.apache.org/snapshots',
-        'repo.spring.io/libs-milestone',
-        'repo.spring.io/plugins-release',
-        'repo.grails.org/grails/core'
-]
-var mirrorList = [
-        'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/',
-        'https://maven.aliyun.com/repository/central',
+var removeList = ['jcenter.bintray.com',
+                  'maven.google.com',
+                  'plugins.gradle.org/m2',
+                  'repo.maven.apache.org',
+                  'repo1.maven.org/maven2',
+                  'repository.apache.org/snapshots',
+                  'repo.spring.io/libs-milestone',
+                  'repo.spring.io/plugins-release',
+                  'repo.grails.org/grails/core']
+var mirrorList = ['https://mirrors.cloud.tencent.com/nexus/repository/maven-public/',
+                  'https://maven.aliyun.com/repository/central',
 //        'https://maven.aliyun.com/repository/jcenter',
-        'https://maven.aliyun.com/repository/google',
-        'https://maven.aliyun.com/repository/gradle-plugin',
-        'https://maven.aliyun.com/repository/releases',
+                  'https://maven.aliyun.com/repository/google',
+                  'https://maven.aliyun.com/repository/gradle-plugin',
+                  'https://maven.aliyun.com/repository/releases',
 //        'https://maven.aliyun.com/repository/spring',
 //        'https://maven.aliyun.com/repository/spring-plugin',
 //        'https://maven.aliyun.com/repository/grails-core',
@@ -25,7 +22,7 @@ var mirrorList = [
 
 def SettingsRepoConfig = (RepositoryHandler repo) -> {
     var removeLater = []
-    repo.each {
+    repo.each { ArtifactRepository it ->
         println("gradle init: [SettingsRepoConfig] check (${it.name}: ${it.url})")
         def url = it.url.toString()
         removeList.each(pattern -> {
@@ -49,16 +46,13 @@ def SettingsRepoConfig = (RepositoryHandler repo) -> {
 }
 
 
-def RepoConfig = {
-    all { ArtifactRepository repo ->
-//        if (!repo instanceof MavenArtifactRepository)
-//            return
-        if (!repo.hasProperty('url'))
-            return
+def repoConfig = {
+    configureEach { ArtifactRepository repo ->
+        if (!repo instanceof MavenArtifactRepository) return
+        if (!repo.hasProperty('url')) return
         var url = repo.url.toString()
         removeList.each {
-            if (!url.contains(it))
-                return
+            if (!url.contains(it)) return
             remove(repo)
             println("gradle init: [buildscript.repositories] (${repo.name}: ${repo.url}) removed")
         }
